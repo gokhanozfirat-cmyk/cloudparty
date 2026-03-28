@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.gokhanozfirat.cloudparty"
+    namespace = "com.cloudparty.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -29,7 +29,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.gokhanozfirat.cloudparty"
+        applicationId = "com.cloudparty.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
