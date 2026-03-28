@@ -1,0 +1,105 @@
+{
+  "appTitle": "CloudParty",
+  "playerControlsTooltip": "Oynatıcı kontrolleri",
+  "languageLabel": "Dil",
+  "languageEnglish": "İngilizce",
+  "languageTurkish": "Türkçe",
+  "navClouds": "Bulutlar",
+  "navLibrary": "Kütüphane",
+  "navPlaylists": "Çalma Listeleri",
+  "cloudSynced": "Bulut senkronlandı.",
+  "cloudConnectFailed": "Bulut bağlantısı kurulamadı. Lütfen tekrar dene.",
+  "cloudSyncFailed": "Bulut senkronu başarısız. Tekrar bağlayıp yeniden dene.",
+  "trackDownloadedOffline": "Parça çevrimdışı mod için indirildi.",
+  "downloadFailed": "İndirme başarısız. URL ve ağı kontrol et.",
+  "connectedMessage": "{platform} bağlandı.",
+  "@connectedMessage": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "addFileUrl": "Dosya URL'si ekle",
+  "trackTitleLabel": "Parça başlığı",
+  "audioUrlLabel": "Ses URL'si",
+  "cancel": "İptal",
+  "add": "Ekle",
+  "invalidTitleOrUrl": "Geçerli bir başlık ve URL gir.",
+  "trackAddedFromUrl": "Parça URL ile eklendi.",
+  "createPlaylistTitle": "Çalma listesi oluştur",
+  "playlistNameLabel": "Çalma listesi adı",
+  "create": "Oluştur",
+  "defaultPlaylistName": "Listem",
+  "trackMovedToPlaylist": "Parça çalma listesine taşındı.",
+  "play": "Oynat",
+  "noTracksInPlaylist": "Bu çalma listesinde parça yok.",
+  "supportedCloudServices": "Desteklenen bulut servisleri",
+  "supportedFormats": "Desteklenen formatlar: {formats}",
+  "@supportedFormats": {
+    "placeholders": {
+      "formats": {
+        "type": "String"
+      }
+    }
+  },
+  "connectAnotherCloud": "Yeni bir bulut bağla",
+  "noCloudConnected": "Henüz bulut bağlanmadı. Sesleri taramak için bir tane ekle.",
+  "filesCount": "{count} dosya",
+  "@filesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addUrlTrackTooltip": "URL ile parça ekle",
+  "syncNowTooltip": "Şimdi senkronla",
+  "libraryEmpty": "Kütüphane boş. Bir bulut bağlayıp senkronlayarak parçaları getir.",
+  "noPlaylistYet": "Henüz çalma listesi yok.",
+  "autoplay": "Otomatik oynat",
+  "noTrackSelected": "Henüz bir parça seçilmedi.",
+  "shuffle": "Karışık",
+  "repeatMode": "Tekrar {mode}",
+  "@repeatMode": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "repeatOff": "kapalı",
+  "repeatAll": "tümü",
+  "repeatOne": "tek",
+  "speed": "Hız",
+  "sleepTimer": "Uyku zamanlayıcısı",
+  "timerOff": "Kapalı",
+  "tracksCount": "{count} parça",
+  "@tracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "moveToPlaylist": "Çalma listesine taşı",
+  "downloadForOffline": "Çevrimdışı indir",
+  "iosShort": "iOS",
+  "cloudGoogleDrive": "Google Drive",
+  "cloudDropbox": "Dropbox",
+  "cloudOneDrive": "OneDrive",
+  "cloudOneDriveBusiness": "OneDrive İş",
+  "cloudBox": "Box",
+  "cloudPCloud": "pCloud",
+  "cloudHiDrive": "HiDrive",
+  "cloudMediafireIos": "Mediafire (iOS)",
+  "cloudWebDav": "WebDAV",
+  "cloudHintDriveApi": "OAuth + Drive API",
+  "cloudHintDropboxApi": "OAuth + Dropbox API",
+  "cloudHintMicrosoftGraph": "OAuth + Microsoft Graph",
+  "cloudHintBoxApi": "OAuth + Box API",
+  "cloudHintPcloudApi": "OAuth + pCloud API",
+  "cloudHintHidriveApi": "OAuth + HiDrive API",
+  "cloudHintIosClientSupport": "iOS istemci desteği",
+  "cloudHintWebdav": "ownCloud / NextCloud / NAS"
+}

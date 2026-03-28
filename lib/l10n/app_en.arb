@@ -1,0 +1,105 @@
+{
+  "appTitle": "CloudParty",
+  "playerControlsTooltip": "Player controls",
+  "languageLabel": "Language",
+  "languageEnglish": "English",
+  "languageTurkish": "Turkish",
+  "navClouds": "Clouds",
+  "navLibrary": "Library",
+  "navPlaylists": "Playlists",
+  "cloudSynced": "Cloud synced.",
+  "cloudConnectFailed": "Cloud connection failed. Please try again.",
+  "cloudSyncFailed": "Cloud sync failed. Please reconnect and retry.",
+  "trackDownloadedOffline": "Track downloaded for offline mode.",
+  "downloadFailed": "Download failed. Check URL and network.",
+  "connectedMessage": "{platform} connected.",
+  "@connectedMessage": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "addFileUrl": "Add file URL",
+  "trackTitleLabel": "Track title",
+  "audioUrlLabel": "Audio URL",
+  "cancel": "Cancel",
+  "add": "Add",
+  "invalidTitleOrUrl": "Enter a valid title and URL.",
+  "trackAddedFromUrl": "Track added from URL.",
+  "createPlaylistTitle": "Create playlist",
+  "playlistNameLabel": "Playlist name",
+  "create": "Create",
+  "defaultPlaylistName": "My Playlist",
+  "trackMovedToPlaylist": "Track moved to playlist.",
+  "play": "Play",
+  "noTracksInPlaylist": "No tracks in this playlist.",
+  "supportedCloudServices": "Supported cloud services",
+  "supportedFormats": "Supported formats: {formats}",
+  "@supportedFormats": {
+    "placeholders": {
+      "formats": {
+        "type": "String"
+      }
+    }
+  },
+  "connectAnotherCloud": "Connect another cloud",
+  "noCloudConnected": "No cloud connected yet. Add one to scan audio tracks.",
+  "filesCount": "{count} files",
+  "@filesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addUrlTrackTooltip": "Add URL track",
+  "syncNowTooltip": "Sync now",
+  "libraryEmpty": "Library is empty. Connect a cloud and sync to fetch tracks.",
+  "noPlaylistYet": "No playlist yet.",
+  "autoplay": "Autoplay",
+  "noTrackSelected": "No track selected yet.",
+  "shuffle": "Shuffle",
+  "repeatMode": "Repeat {mode}",
+  "@repeatMode": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "repeatOff": "off",
+  "repeatAll": "all",
+  "repeatOne": "one",
+  "speed": "Speed",
+  "sleepTimer": "Sleep timer",
+  "timerOff": "Off",
+  "tracksCount": "{count} tracks",
+  "@tracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "moveToPlaylist": "Move to playlist",
+  "downloadForOffline": "Download for offline",
+  "iosShort": "iOS",
+  "cloudGoogleDrive": "Google Drive",
+  "cloudDropbox": "Dropbox",
+  "cloudOneDrive": "OneDrive",
+  "cloudOneDriveBusiness": "OneDrive for Business",
+  "cloudBox": "Box",
+  "cloudPCloud": "pCloud",
+  "cloudHiDrive": "HiDrive",
+  "cloudMediafireIos": "Mediafire (iOS)",
+  "cloudWebDav": "WebDAV",
+  "cloudHintDriveApi": "OAuth + Drive API",
+  "cloudHintDropboxApi": "OAuth + Dropbox API",
+  "cloudHintMicrosoftGraph": "OAuth + Microsoft Graph",
+  "cloudHintBoxApi": "OAuth + Box API",
+  "cloudHintPcloudApi": "OAuth + pCloud API",
+  "cloudHintHidriveApi": "OAuth + HiDrive API",
+  "cloudHintIosClientSupport": "iOS client support",
+  "cloudHintWebdav": "ownCloud / NextCloud / NAS"
+}
