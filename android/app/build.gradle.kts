@@ -1,8 +1,17 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// Load signing credentials from android/key.properties (not committed to git)
+val keyPropertiesFile = rootProject.file("key.properties")
+val keyProperties = Properties()
+if (keyPropertiesFile.exists()) {
+    keyProperties.load(keyPropertiesFile.inputStream())
 }
 
 android {
@@ -21,10 +30,11 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("cloudparty.keystore")
-            storePassword = "465486"
-            keyAlias = "cloudparty"
-            keyPassword = "465486"
+            storeFile = if (keyPropertiesFile.exists())
+                file(keyProperties["storeFile"] as String) else null
+            storePassword = keyProperties["storePassword"] as String? ?: ""
+            keyAlias = keyProperties["keyAlias"] as String? ?: ""
+            keyPassword = keyProperties["keyPassword"] as String? ?: ""
         }
     }
 

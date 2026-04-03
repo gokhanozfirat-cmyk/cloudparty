@@ -505,6 +505,34 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'ownCloud / NextCloud / NAS'**
   String get cloudHintWebdav;
+
+  String get allTracks;
+  String get artists;
+  String get offline;
+  String get favorites;
+  String get lastPlayed;
+  String get noFavorites;
+  String get noLastPlayed;
+  String get noOfflineTracks;
+  String get addFavorite;
+  String get removeFavorite;
+  String get addFolderToPlaylist;
+  String get folderAddedToPlaylist;
+  String get disconnect;
+  String get disconnectConfirmTitle;
+  String get disconnectConfirmBody;
+  String get disconnected;
+  String get deletePlaylistLabel;
+  String get deletePlaylistConfirmBody;
+  String get playlistDeleted;
+  String get searchTracksHint;
+  String get noSearchResults;
+  String get webDavUrlLabel;
+  String get webDavUsernameLabel;
+  String get webDavPasswordLabel;
+  String get webDavConnectButton;
+  String get webDavUrlHint;
+  String get providerNotYetSupported;
 }
 
 class _AppLocalizationsDelegate

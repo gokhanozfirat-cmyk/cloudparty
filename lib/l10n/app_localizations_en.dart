@@ -224,4 +224,86 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cloudHintWebdav => 'ownCloud / NextCloud / NAS';
+
+  @override
+  String get allTracks => 'All';
+
+  @override
+  String get artists => 'Artists';
+
+  @override
+  String get offline => 'Offline';
+
+  @override
+  String get favorites => 'Favorites';
+
+  @override
+  String get lastPlayed => 'Last Played';
+
+  @override
+  String get noFavorites => 'No favorites yet. Tap ♥ on a track.';
+
+  @override
+  String get noLastPlayed => 'No recently played tracks.';
+
+  @override
+  String get noOfflineTracks => 'No offline tracks. Download tracks first.';
+
+  @override
+  String get addFavorite => 'Add to Favorites';
+
+  @override
+  String get removeFavorite => 'Remove from Favorites';
+
+  @override
+  String get addFolderToPlaylist => 'Add folder to playlist';
+
+  @override
+  String get folderAddedToPlaylist => 'Folder added to playlist.';
+
+  @override
+  String get disconnect => 'Disconnect';
+
+  @override
+  String get disconnectConfirmTitle => 'Disconnect cloud?';
+
+  @override
+  String get disconnectConfirmBody =>
+      'This will remove all tracks from this connection.';
+
+  @override
+  String get disconnected => 'Cloud disconnected.';
+
+  @override
+  String get deletePlaylistLabel => 'Delete playlist';
+
+  @override
+  String get deletePlaylistConfirmBody => 'Delete this playlist?';
+
+  @override
+  String get playlistDeleted => 'Playlist deleted.';
+
+  @override
+  String get searchTracksHint => 'Search tracks...';
+
+  @override
+  String get noSearchResults => 'No results found.';
+
+  @override
+  String get webDavUrlLabel => 'Server URL';
+
+  @override
+  String get webDavUsernameLabel => 'Username';
+
+  @override
+  String get webDavPasswordLabel => 'Password';
+
+  @override
+  String get webDavConnectButton => 'Connect';
+
+  @override
+  String get webDavUrlHint => 'https://your-server.com/dav/';
+
+  @override
+  String get providerNotYetSupported => 'This provider is not yet supported. Coming soon!';
 }

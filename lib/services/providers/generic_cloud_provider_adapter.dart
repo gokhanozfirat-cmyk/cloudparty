@@ -1,8 +1,9 @@
 import '../../models/audio_track.dart';
 import '../../models/cloud_models.dart';
+import '../cloud_sync_exception.dart';
 import 'cloud_provider_adapter.dart';
 
-class GenericCloudProviderAdapter implements CloudProviderAdapter {
+class GenericCloudProviderAdapter extends CloudProviderAdapter {
   GenericCloudProviderAdapter(this._platform);
 
   final CloudPlatform _platform;
@@ -14,12 +15,10 @@ class GenericCloudProviderAdapter implements CloudProviderAdapter {
   Future<CloudConnection> connect({
     required String connectionId,
     required String fallbackDisplayName,
+    Map<String, String> extraData = const {},
   }) async {
-    return CloudConnection(
-      id: connectionId,
-      platform: _platform,
-      displayName: fallbackDisplayName,
-      connectedAt: DateTime.now(),
+    throw CloudSyncException(
+      '${_platform.label} henüz desteklenmiyor. Yakında eklenecek!',
     );
   }
 

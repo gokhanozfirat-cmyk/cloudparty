@@ -47,3 +47,4 @@ app.*.map.json
 # Keystore — never commit signing keys
 *.keystore
 *.jks
+android/key.properties

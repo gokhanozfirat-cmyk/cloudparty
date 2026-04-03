@@ -4,6 +4,7 @@ import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:uuid/uuid.dart';
 
 import '../../models/audio_track.dart';
+import '../../models/cloud_folder_item.dart';
 import '../../models/cloud_models.dart';
 import '../cloud_sync_exception.dart';
 import '../secure_connection_store.dart';
@@ -30,9 +31,13 @@ class GoogleDriveProviderAdapter implements CloudProviderAdapter {
   static const Set<String> _supportedExtensions = <String>{
     'mp3',
     'm4a',
+    'mp4',
     'wav',
     'flac',
     'alac',
+    'ogg',
+    'opus',
+    'aac',
   };
 
   @override
@@ -42,6 +47,7 @@ class GoogleDriveProviderAdapter implements CloudProviderAdapter {
   Future<CloudConnection> connect({
     required String connectionId,
     required String fallbackDisplayName,
+    Map<String, String> extraData = const {},
   }) async {
     GoogleSignInAccount? account;
     try {
@@ -109,7 +115,7 @@ class GoogleDriveProviderAdapter implements CloudProviderAdapter {
     try {
       do {
         final drive.FileList response = await api.files.list(
-          q: "trashed = false and (mimeType contains 'audio/' or name contains '.mp3' or name contains '.m4a' or name contains '.wav' or name contains '.flac' or name contains '.alac')",
+          q: "trashed = false and (mimeType contains 'audio/' or mimeType contains 'video/mp4' or name contains '.mp3' or name contains '.m4a' or name contains '.mp4' or name contains '.wav' or name contains '.flac' or name contains '.alac' or name contains '.ogg' or name contains '.opus' or name contains '.aac')",
           $fields:
               'nextPageToken, files(id,name,mimeType,modifiedTime,size,owners(displayName))',
           orderBy: 'modifiedTime desc',
@@ -164,6 +170,94 @@ class GoogleDriveProviderAdapter implements CloudProviderAdapter {
     }
 
     return tracks;
+  }
+
+  @override
+  Future<List<CloudFolderItem>> listFolder(
+    CloudConnection connection,
+    String? folderId,
+  ) async {
+    final GoogleSignInAccount? account = await _googleSignIn.signInSilently();
+    if (account == null) {
+      throw CloudSyncException('Google Drive session expired. Please reconnect.');
+    }
+
+    final client = await _googleSignIn.authenticatedClient();
+    if (client == null) {
+      throw CloudSyncException('Google Drive client unavailable. Reconnect required.');
+    }
+
+    final GoogleSignInAuthentication auth = await account.authentication;
+    if (auth.accessToken == null || auth.accessToken!.isEmpty) {
+      throw CloudSyncException('Google Drive token missing. Reconnect required.');
+    }
+
+    final drive.DriveApi api = drive.DriveApi(client);
+    final String parentId = folderId ?? 'root';
+    final List<CloudFolderItem> items = <CloudFolderItem>[];
+    String? pageToken;
+
+    try {
+      do {
+        final drive.FileList response = await api.files.list(
+          q: "'$parentId' in parents and trashed = false",
+          $fields:
+              'nextPageToken, files(id,name,mimeType,owners(displayName))',
+          orderBy: 'folder,name',
+          pageSize: 200,
+          pageToken: pageToken,
+          spaces: 'drive',
+          corpora: 'user',
+        );
+
+        for (final drive.File file in response.files ?? <drive.File>[]) {
+          final bool isFolder =
+              file.mimeType == 'application/vnd.google-apps.folder';
+          if (!isFolder && !_isAudio(file)) continue;
+          final String id = file.id ?? '';
+          if (id.isEmpty) continue;
+
+          items.add(
+            CloudFolderItem(
+              id: id,
+              name: file.name ?? 'Unknown',
+              isFolder: isFolder,
+              mimeType: file.mimeType,
+              remoteUrl: isFolder
+                  ? null
+                  : 'https://www.googleapis.com/drive/v3/files/$id?alt=media',
+              requestHeaders: isFolder
+                  ? null
+                  : <String, String>{
+                      'Authorization': 'Bearer ${auth.accessToken}',
+                    },
+              artist: file.owners?.firstOrNull?.displayName ??
+                  connection.displayName,
+              format: isFolder
+                  ? null
+                  : _resolveFormat(file.name ?? '', file.mimeType),
+            ),
+          );
+        }
+        pageToken = response.nextPageToken;
+      } while (pageToken != null && pageToken.isNotEmpty);
+    } finally {
+      client.close();
+    }
+
+    return items;
+  }
+
+  @override
+  Future<Map<String, String>?> getFreshHeaders(
+    CloudConnection connection,
+  ) async {
+    final GoogleSignInAccount? account =
+        await _googleSignIn.signInSilently();
+    if (account == null) return null;
+    final GoogleSignInAuthentication auth = await account.authentication;
+    if (auth.accessToken == null || auth.accessToken!.isEmpty) return null;
+    return <String, String>{'Authorization': 'Bearer ${auth.accessToken}'};
   }
 
   @override

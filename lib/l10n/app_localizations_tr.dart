@@ -225,4 +225,86 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get cloudHintWebdav => 'ownCloud / NextCloud / NAS';
+
+  @override
+  String get allTracks => 'Tümü';
+
+  @override
+  String get artists => 'Sanatçılar';
+
+  @override
+  String get offline => 'Çevrimdışı';
+
+  @override
+  String get favorites => 'Favoriler';
+
+  @override
+  String get lastPlayed => 'Son Çalınanlar';
+
+  @override
+  String get noFavorites => 'Henüz favori yok. Bir parçaya ♥ bas.';
+
+  @override
+  String get noLastPlayed => 'Son çalınan parça yok.';
+
+  @override
+  String get noOfflineTracks => 'Çevrimdışı parça yok. Önce indirmen gerekiyor.';
+
+  @override
+  String get addFavorite => 'Favorilere ekle';
+
+  @override
+  String get removeFavorite => 'Favorilerden çıkar';
+
+  @override
+  String get addFolderToPlaylist => 'Klasörü playlist\'e ekle';
+
+  @override
+  String get folderAddedToPlaylist => 'Klasör playlist\'e eklendi.';
+
+  @override
+  String get disconnect => 'Bağlantıyı kes';
+
+  @override
+  String get disconnectConfirmTitle => 'Bağlantı kesilsin mi?';
+
+  @override
+  String get disconnectConfirmBody =>
+      'Bu bağlantıya ait tüm parçalar kaldırılacak.';
+
+  @override
+  String get disconnected => 'Bulut bağlantısı kesildi.';
+
+  @override
+  String get deletePlaylistLabel => 'Çalma listesini sil';
+
+  @override
+  String get deletePlaylistConfirmBody => 'Bu çalma listesi silinsin mi?';
+
+  @override
+  String get playlistDeleted => 'Çalma listesi silindi.';
+
+  @override
+  String get searchTracksHint => 'Parçalarda ara...';
+
+  @override
+  String get noSearchResults => 'Sonuç bulunamadı.';
+
+  @override
+  String get webDavUrlLabel => 'Sunucu URL\'si';
+
+  @override
+  String get webDavUsernameLabel => 'Kullanıcı adı';
+
+  @override
+  String get webDavPasswordLabel => 'Şifre';
+
+  @override
+  String get webDavConnectButton => 'Bağlan';
+
+  @override
+  String get webDavUrlHint => 'https://sunucunuz.com/dav/';
+
+  @override
+  String get providerNotYetSupported => 'Yakında! Bu sağlayıcı henüz desteklenmiyor.';
 }

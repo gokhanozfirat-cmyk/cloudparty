@@ -1,11 +1,19 @@
 import 'package:uuid/uuid.dart';
 
 import '../models/audio_track.dart';
+import '../models/cloud_folder_item.dart';
 import '../models/cloud_models.dart';
 import 'cloud_sync_exception.dart';
+import 'providers/box_provider_adapter.dart';
 import 'providers/cloud_provider_adapter.dart';
+import 'providers/dropbox_provider_adapter.dart';
 import 'providers/generic_cloud_provider_adapter.dart';
 import 'providers/google_drive_provider_adapter.dart';
+import 'providers/hidrive_provider_adapter.dart';
+import 'providers/onedrive_provider_adapter.dart';
+import 'providers/pcloud_provider_adapter.dart';
+import 'providers/oauth_provider_adapter.dart';
+import 'providers/webdav_provider_adapter.dart';
 
 class CloudSyncService {
   CloudSyncService({
@@ -20,26 +28,23 @@ class CloudSyncService {
   static Map<CloudPlatform, CloudProviderAdapter> _defaultProviders() {
     return <CloudPlatform, CloudProviderAdapter>{
       CloudPlatform.googleDrive: GoogleDriveProviderAdapter(),
-      CloudPlatform.dropbox: GenericCloudProviderAdapter(CloudPlatform.dropbox),
-      CloudPlatform.oneDrive: GenericCloudProviderAdapter(
-        CloudPlatform.oneDrive,
-      ),
-      CloudPlatform.oneDriveBusiness: GenericCloudProviderAdapter(
-        CloudPlatform.oneDriveBusiness,
-      ),
-      CloudPlatform.box: GenericCloudProviderAdapter(CloudPlatform.box),
-      CloudPlatform.pCloud: GenericCloudProviderAdapter(CloudPlatform.pCloud),
-      CloudPlatform.hiDrive: GenericCloudProviderAdapter(CloudPlatform.hiDrive),
-      CloudPlatform.mediafireIos: GenericCloudProviderAdapter(
-        CloudPlatform.mediafireIos,
-      ),
-      CloudPlatform.webDav: GenericCloudProviderAdapter(CloudPlatform.webDav),
+      CloudPlatform.dropbox: DropboxProviderAdapter(),
+      CloudPlatform.oneDrive: OneDriveProviderAdapter(CloudPlatform.oneDrive),
+      CloudPlatform.oneDriveBusiness:
+          OneDriveProviderAdapter(CloudPlatform.oneDriveBusiness),
+      CloudPlatform.box: BoxProviderAdapter(),
+      CloudPlatform.pCloud: PCloudProviderAdapter(),
+      CloudPlatform.hiDrive: HiDriveProviderAdapter(),
+      CloudPlatform.mediafireIos:
+          GenericCloudProviderAdapter(CloudPlatform.mediafireIos),
+      CloudPlatform.webDav: WebDavProviderAdapter(),
     };
   }
 
   Future<CloudConnection> connectPlatform(
     CloudPlatform platform, {
     required String fallbackDisplayName,
+    Map<String, String> extraData = const {},
   }) async {
     final CloudProviderAdapter? adapter = _providers[platform];
     if (adapter == null) {
@@ -49,6 +54,7 @@ class CloudSyncService {
     return adapter.connect(
       connectionId: _uuid.v4(),
       fallbackDisplayName: fallbackDisplayName,
+      extraData: extraData,
     );
   }
 
@@ -69,6 +75,35 @@ class CloudSyncService {
       return;
     }
     await adapter.disconnect(connection);
+  }
+
+  Future<Map<String, String>?> getFreshHeaders(
+    CloudConnection connection,
+  ) async {
+    final CloudProviderAdapter? adapter = _providers[connection.platform];
+    return adapter?.getFreshHeaders(connection);
+  }
+
+  Future<List<CloudFolderItem>> listFolder(
+    CloudConnection connection,
+    String? folderId,
+  ) async {
+    final CloudProviderAdapter? adapter = _providers[connection.platform];
+    if (adapter == null) return <CloudFolderItem>[];
+    return adapter.listFolder(connection, folderId);
+  }
+
+  /// Completes an OAuth exchange that was interrupted by a process kill.
+  /// Returns the new [CloudConnection] if pending state + initial link match,
+  /// or null otherwise.
+  Future<CloudConnection?> completePendingOAuth() async {
+    for (final CloudProviderAdapter adapter in _providers.values) {
+      if (adapter is OAuthProviderAdapter) {
+        final CloudConnection? result = await adapter.completePendingIfNeeded();
+        if (result != null) return result;
+      }
+    }
+    return null;
   }
 
   AudioTrack createManualTrack({

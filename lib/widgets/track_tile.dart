@@ -4,7 +4,7 @@ import 'package:cloudparty/l10n/app_localizations.dart';
 import '../main.dart';
 import '../models/audio_track.dart';
 
-enum TrackAction { addToPlaylist, download }
+enum TrackAction { addToPlaylist, download, toggleFavorite }
 
 class TrackTile extends StatelessWidget {
   const TrackTile({
@@ -13,12 +13,14 @@ class TrackTile extends StatelessWidget {
     required this.onTap,
     required this.onAction,
     this.index,
+    this.isFavorite = false,
   });
 
   final AudioTrack track;
   final VoidCallback onTap;
   final ValueChanged<TrackAction> onAction;
   final int? index;
+  final bool isFavorite;
 
   @override
   Widget build(BuildContext context) {
@@ -165,6 +167,27 @@ class TrackTile extends StatelessWidget {
                         const SizedBox(width: 10),
                         Text(
                           l10n.downloadForOffline,
+                          style: const TextStyle(color: AppColors.textPrimary),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<TrackAction>(
+                    value: TrackAction.toggleFavorite,
+                    child: Row(
+                      children: [
+                        Icon(
+                          isFavorite
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
+                          color: isFavorite
+                              ? Colors.pinkAccent
+                              : AppColors.textSecondary,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          isFavorite ? l10n.removeFavorite : l10n.addFavorite,
                           style: const TextStyle(color: AppColors.textPrimary),
                         ),
                       ],

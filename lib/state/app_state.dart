@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/audio_track.dart';
+import '../models/cloud_folder_item.dart';
 import '../models/cloud_models.dart';
 import '../models/playlist_model.dart';
 import '../services/cloud_sync_service.dart';
@@ -21,7 +22,15 @@ class AppState extends ChangeNotifier {
        _downloadService = downloadService ?? OfflineDownloadService(),
        _uuid = const Uuid() {
     _player.playerStateStream.listen((_) => notifyListeners());
-    _player.currentIndexStream.listen((_) => notifyListeners());
+    _player.currentIndexStream.listen((int? index) {
+      if (index != null &&
+          _activeQueue.isNotEmpty &&
+          index >= 0 &&
+          index < _activeQueue.length) {
+        _recordLastPlayed(_activeQueue[index].id);
+      }
+      notifyListeners();
+    });
     _player.shuffleModeEnabledStream.listen((_) => notifyListeners());
     _player.loopModeStream.listen((_) => notifyListeners());
     _player.speedStream.listen((_) => notifyListeners());
@@ -31,6 +40,8 @@ class AppState extends ChangeNotifier {
   static const String _tracksKey = 'cloudparty.tracks';
   static const String _playlistsKey = 'cloudparty.playlists';
   static const String _localeCodeKey = 'cloudparty.localeCode';
+  static const String _favoritesKey = 'cloudparty.favorites';
+  static const String _lastPlayedKey = 'cloudparty.lastPlayed';
 
   final CloudSyncService _syncService;
   final OfflineDownloadService _downloadService;
@@ -47,6 +58,10 @@ class AppState extends ChangeNotifier {
 
   List<AudioTrack> _activeQueue = <AudioTrack>[];
 
+  bool _isOfflineOnly = false;
+  final Set<String> _favoriteIds = <String>{};
+  final List<String> _lastPlayedIds = <String>[];
+
   Timer? _autoSyncTimer;
   Timer? _sleepTimer;
   DateTime? _sleepEndsAt;
@@ -55,9 +70,41 @@ class AppState extends ChangeNotifier {
   bool get isInitialized => _isInitialized;
   Locale get locale => _locale;
   String get localeCode => _locale.languageCode;
+  bool get isOfflineOnly => _isOfflineOnly;
   List<CloudConnection> get connections =>
       List<CloudConnection>.unmodifiable(_connections);
   List<AudioTrack> get tracks => List<AudioTrack>.unmodifiable(_tracks);
+
+  List<AudioTrack> get displayTracks {
+    if (_isOfflineOnly) {
+      return _tracks.where((AudioTrack t) => t.isOffline).toList(growable: false);
+    }
+    return List<AudioTrack>.unmodifiable(_tracks);
+  }
+
+  List<AudioTrack> get favoriteTracks => _tracks
+      .where((AudioTrack t) => _favoriteIds.contains(t.id))
+      .toList(growable: false);
+
+  List<AudioTrack> get lastPlayedTracks => _lastPlayedIds
+      .map((String id) => _tracks.cast<AudioTrack?>().firstWhere(
+            (AudioTrack? t) => t?.id == id,
+            orElse: () => null,
+          ))
+      .whereType<AudioTrack>()
+      .toList(growable: false);
+
+  Map<String, List<AudioTrack>> get tracksByArtist {
+    final Map<String, List<AudioTrack>> result = <String, List<AudioTrack>>{};
+    for (final AudioTrack track in _tracks) {
+      if (_isOfflineOnly && !track.isOffline) continue;
+      result.putIfAbsent(track.artist, () => <AudioTrack>[]).add(track);
+    }
+    return result;
+  }
+
+  bool isFavorite(String trackId) => _favoriteIds.contains(trackId);
+
   List<PlaylistModel> get playlists =>
       List<PlaylistModel>.unmodifiable(_playlists);
 
@@ -104,6 +151,26 @@ class AppState extends ChangeNotifier {
     if (_connections.isNotEmpty) {
       unawaited(refreshAllConnections(silent: true));
     }
+    // Recover OAuth connection that was interrupted by a process kill
+    unawaited(_checkPendingOAuthCallback());
+  }
+
+  Future<void> _checkPendingOAuthCallback() async {
+    try {
+      final CloudConnection? connection =
+          await _syncService.completePendingOAuth();
+      if (connection == null) return;
+
+      _connections.add(connection);
+      notifyListeners();
+
+      try {
+        await syncConnection(connection.id, persistAfter: false);
+      } catch (_) {}
+      await _persist();
+    } catch (_) {
+      // Silently ignore — this is a background recovery attempt
+    }
   }
 
   Future<void> setLocaleCode(String code) async {
@@ -121,6 +188,7 @@ class AppState extends ChangeNotifier {
   Future<void> connectPlatform(
     CloudPlatform platform, {
     String? displayName,
+    Map<String, String> extraData = const {},
   }) async {
     final String fallbackName = displayName?.trim().isNotEmpty == true
         ? displayName!.trim()
@@ -129,6 +197,7 @@ class AppState extends ChangeNotifier {
     final CloudConnection connection = await _syncService.connectPlatform(
       platform,
       fallbackDisplayName: fallbackName,
+      extraData: extraData,
     );
 
     _connections.add(connection);
@@ -403,6 +472,101 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setOfflineOnly(bool value) {
+    if (_isOfflineOnly == value) return;
+    _isOfflineOnly = value;
+    notifyListeners();
+  }
+
+  Future<void> toggleFavorite(String trackId) async {
+    if (_favoriteIds.contains(trackId)) {
+      _favoriteIds.remove(trackId);
+    } else {
+      _favoriteIds.add(trackId);
+    }
+    notifyListeners();
+    await _persist();
+  }
+
+  void _recordLastPlayed(String trackId) {
+    _lastPlayedIds.remove(trackId);
+    _lastPlayedIds.insert(0, trackId);
+    if (_lastPlayedIds.length > 50) {
+      _lastPlayedIds.removeLast();
+    }
+  }
+
+  Future<List<CloudFolderItem>> listFolder(
+    String connectionId,
+    String? folderId,
+  ) async {
+    final CloudConnection connection = _connections.firstWhere(
+      (CloudConnection c) => c.id == connectionId,
+    );
+    return _syncService.listFolder(connection, folderId);
+  }
+
+  Future<void> playCloudItem(
+    String connectionId,
+    CloudFolderItem item,
+    List<CloudFolderItem> siblings,
+  ) async {
+    final CloudConnection connection = _connections.firstWhere(
+      (CloudConnection c) => c.id == connectionId,
+    );
+
+    AudioTrack toTrack(CloudFolderItem f) {
+      final String rawName = f.name;
+      final int dot = rawName.lastIndexOf('.');
+      final String title = dot > 0 ? rawName.substring(0, dot) : rawName;
+      return AudioTrack(
+        id: _uuid.v4(),
+        connectionId: connectionId,
+        provider: connection.platform,
+        title: title,
+        artist: f.artist ?? connection.displayName,
+        format: f.format ?? 'MP3',
+        createdAt: DateTime.now(),
+        remoteUrl: f.remoteUrl!,
+        requestHeaders: f.requestHeaders ?? <String, String>{},
+      );
+    }
+
+    final List<AudioTrack> queue = siblings
+        .where((CloudFolderItem f) => !f.isFolder && f.remoteUrl != null)
+        .map(toTrack)
+        .toList();
+
+    if (queue.isEmpty) return;
+
+    final int startIndex = queue.indexWhere(
+      (AudioTrack t) => t.remoteUrl == item.remoteUrl,
+    );
+    await _setQueueAndPlay(queue, startIndex == -1 ? 0 : startIndex);
+  }
+
+  Future<void> disconnectConnection(String connectionId) async {
+    final int index = _connections.indexWhere(
+      (CloudConnection item) => item.id == connectionId,
+    );
+    if (index == -1) return;
+
+    final CloudConnection connection = _connections[index];
+    await _syncService.disconnectConnection(connection);
+    _connections.removeAt(index);
+    _tracks.removeWhere(
+      (AudioTrack track) => track.connectionId == connectionId,
+    );
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<void> deletePlaylist(String playlistId) async {
+    _playlists.removeWhere((PlaylistModel item) => item.id == playlistId);
+    notifyListeners();
+    await _persist();
+  }
+
   Future<void> downloadTrack(String trackId) async {
     final int index = _tracks.indexWhere(
       (AudioTrack item) => item.id == trackId,
@@ -424,10 +588,37 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> _setQueueAndPlay(List<AudioTrack> queue, int index) async {
-    _activeQueue = queue;
+    // Refresh auth tokens per connection before playing
+    final Map<String, Map<String, String>?> headerCache =
+        <String, Map<String, String>?>{};
+
+    final List<AudioTrack> refreshed = <AudioTrack>[];
+    for (final AudioTrack track in queue) {
+      if (track.isOffline || track.isManual) {
+        refreshed.add(track);
+        continue;
+      }
+      if (!headerCache.containsKey(track.connectionId)) {
+        final int ci = _connections.indexWhere(
+          (CloudConnection c) => c.id == track.connectionId,
+        );
+        if (ci != -1) {
+          headerCache[track.connectionId] =
+              await _syncService.getFreshHeaders(_connections[ci]);
+        } else {
+          headerCache[track.connectionId] = null;
+        }
+      }
+      final Map<String, String>? fresh = headerCache[track.connectionId];
+      refreshed.add(
+        fresh != null ? track.copyWith(requestHeaders: fresh) : track,
+      );
+    }
+
+    _activeQueue = refreshed;
 
     await _player.setAudioSources(
-      queue
+      refreshed
           .map(
             (AudioTrack track) => AudioSource.uri(
               track.playUri,
@@ -495,6 +686,18 @@ class AppState extends ChangeNotifier {
               .toList(growable: false),
         );
     }
+
+    final String? rawFavorites = prefs.getString(_favoritesKey);
+    if (rawFavorites != null && rawFavorites.isNotEmpty) {
+      final List<dynamic> decoded = jsonDecode(rawFavorites) as List<dynamic>;
+      _favoriteIds.addAll(decoded.cast<String>());
+    }
+
+    final String? rawLastPlayed = prefs.getString(_lastPlayedKey);
+    if (rawLastPlayed != null && rawLastPlayed.isNotEmpty) {
+      final List<dynamic> decoded = jsonDecode(rawLastPlayed) as List<dynamic>;
+      _lastPlayedIds.addAll(decoded.cast<String>());
+    }
   }
 
   Future<void> _persist() async {
@@ -526,6 +729,14 @@ class AppState extends ChangeNotifier {
       ),
     );
     await prefs.setString(_localeCodeKey, _locale.languageCode);
+    await prefs.setString(
+      _favoritesKey,
+      jsonEncode(_favoriteIds.toList()),
+    );
+    await prefs.setString(
+      _lastPlayedKey,
+      jsonEncode(_lastPlayedIds),
+    );
   }
 
   PlaylistModel? _playlistById(String id) {
